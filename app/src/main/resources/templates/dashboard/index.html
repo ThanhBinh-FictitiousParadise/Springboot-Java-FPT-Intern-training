@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/main}">
+
+<body>
+<div layout:fragment="content" class="container-fluid">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="text-primary fw-bold">Dashboard Overview</h2>
+    <div class="text-muted">Welcome back!</div>
+  </div>
+
+  <div class="row g-4">
+    <!-- Popular Subjects Card -->
+    <div class="col-md-6">
+      <div class="card shadow-lg border-0">
+        <div class="card-header bg-primary text-white border-0">
+          <div class="d-flex align-items-center">
+            <i class="fas fa-star me-2"></i>
+            <h5 class="mb-0">Popular Subjects</h5>
+          </div>
+        </div>
+        <div class="card-body p-0">
+          <div class="list-group list-group-flush">
+            <div th:each="subject : ${topSubjects}" class="list-group-item d-flex justify-content-between align-items-center">
+              <div class="d-flex align-items-center">
+                <div class="subject-icon me-3">
+                  <i class="fas fa-book text-primary"></i>
+                </div>
+                <span th:text="${subject.name}" class="fw-medium"></span>
+              </div>
+              <span class="badge bg-primary rounded-pill" th:text="${subject.count}"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Statistics Chart Card -->
+    <div class="col-md-6">
+      <div class="card shadow-lg border-0">
+        <div class="card-header bg-primary text-white border-0">
+          <div class="d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center">
+              <i class="fas fa-chart-bar me-2"></i>
+              <h5 class="mb-0">Registration Statistics</h5>
+            </div>
+            <ul class="nav nav-pills" id="chartTab" role="tablist">
+              <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="bar-tab" data-bs-toggle="tab" data-bs-target="#bar-chart" type="button" role="tab">
+                  Bar
+                </button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button class="nav-link" id="pie-tab" data-bs-toggle="tab" data-bs-target="#pie-chart" type="button" role="tab">
+                  Pie
+                </button>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="tab-content" id="chartTabContent">
+            <div class="tab-pane fade show active" id="bar-chart" role="tabpanel">
+              <canvas id="registrationBarChart"></canvas>
+            </div>
+            <div class="tab-pane fade" id="pie-chart" role="tabpanel">
+              <canvas id="registrationPieChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<th:block layout:fragment="scripts">
+  <script th:inline="javascript">
+    document.addEventListener('DOMContentLoaded', function () {
+      const subjects = /*[[${topSubjects}]]*/ [];
+      if (subjects.length === 0) return;
+
+      const subjectNames = subjects.map(subject => subject.name);
+      const studentCounts = subjects.map(subject => subject.count);
+      const colors = [
+        'rgba(59, 130, 246, 0.7)',
+        'rgba(16, 185, 129, 0.7)',
+        'rgba(239, 68, 68, 0.7)',
+        'rgba(217, 119, 6, 0.7)',
+        'rgba(139, 92, 246, 0.7)'
+      ];
+
+      function createChart(chartId, type) {
+        const ctx = document.getElementById(chartId).getContext('2d');
+        new Chart(ctx, {
+          type: type,
+          data: {
+            labels: subjectNames,
+            datasets: [{
+              label: 'Enrollments',
+              data: studentCounts,
+              backgroundColor: colors,
+              borderColor: colors.map(color => color.replace('0.7', '1')),
+              borderWidth: 1
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                display: type === 'pie'
+              }
+            },
+            scales: type === 'bar' ? {
+              y: {
+                beginAtZero: true,
+                ticks: {
+                  stepSize: 1
+                }
+              }
+            } : undefined
+          }
+        });
+      }
+
+      createChart('registrationBarChart', 'bar');
+      createChart('registrationPieChart', 'pie');
+    });
+  </script>
+</th:block>
+</body>
+</html>

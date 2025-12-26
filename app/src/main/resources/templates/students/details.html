@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html layout:decorate="~{layouts/main}"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:th="http://www.thymeleaf.org">
+<body>
+<div class="container-fluid" layout:fragment="content">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card shadow-lg mb-4">
+                <div class="card-body text-center">
+                    <img alt="Student Profile"
+                         class="img-fluid rounded-circle mb-3" style="width: 150px; height: 150px;"
+                         th:src="${student.imageFilename != null} ? '/uploads/' + ${student.imageFilename} : '/images/default_user.png'">
+                    <h3 class="mb-0" th:text="${student.name}"></h3>
+                    <p class="text-muted" th:text="${student.sid}"></p>
+                    <div class="d-grid gap-2">
+                        <a class="btn btn-outline-primary d-flex align-items-center justify-content-center gap-2"
+                           th:href="@{/students/edit/{id}(id=${student.id})}">
+                            <i class="fas fa-edit"></i>
+                            <span>Edit Profile</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <div class="card shadow-lg mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Personal Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="info-group">
+                                <label class="text-muted">Email</label>
+                                <p class="mb-3" th:text="${student.email}"></p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-group">
+                                <label class="text-muted">Date of Birth</label>
+                                <p class="mb-3" th:text="${#temporals.format(student.dateOfBirth, 'dd-MM-yyyy')}"></p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-group">
+                                <label class="text-muted">Contact</label>
+                                <p class="mb-3" th:text="${student.contact}"></p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-group">
+                                <label class="text-muted">Address</label>
+                                <p class="mb-3" th:text="${student.address}"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card shadow-lg mb-4">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Registered Courses</h5>
+            <a class="btn btn-outline-primary btn-sm"
+               th:href="@{/registration/new(studentId=${student.id})}">
+                <i class="fas fa-plus"></i> Register New Course
+            </a>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0" id="registeredSubjectsTable">
+                    <thead>
+                    <tr>
+                        <th class="ps-4">Course</th>
+                        <th>Semester</th>
+                        <th>Academic Year</th>
+                        <th>Status</th>
+                        <th>Grade</th>
+                        <th>Registration Date</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="registration : ${registrations}">
+                        <td class="ps-4">
+                            <a th:href="@{/subjects/{subjectId}(subjectId=${registration.subject.id})}"
+                               th:text="${registration.subject.name}"></a>
+                        </td>
+                        <td th:text="${registration.semester}"></td>
+                        <td th:text="${registration.academicYear}"></td>
+                        <td>
+                            <select th:id="'status-' + ${registration.id}"
+                                    th:name="'status-' + ${registration.id}"
+                                    th:class="${registration.status == 1} ? '' : 'disabled'"
+                                    th:disabled="${registration.status != 1}"
+                                    th:value="${registration.status}"
+                                    onchange="updateRegistrationStatus(this, ${registration.id})">
+                                <option value="1" th:selected="${registration.status == 1}">Enrolling</option>
+                                <option value="2" th:selected="${registration.status == 2}">Finished</option>
+                                <option value="3" th:selected="${registration.status == 3}">Cancelled</option>
+                            </select>
+                        </td>
+                        <td>
+                            <input type="number"
+                                   step="0.01"
+                                   min="0"
+                                   max="10"
+                                   th:id="'grade-' + ${registration.id}"
+                                   th:name="'grade-' + ${registration.id}"
+                                   th:class="${registration.status == 1} ? '' : 'disabled'"
+                                   th:disabled="${registration.status != 1}"
+                                   th:value="${registration.grade != null ? registration.grade : ''}"
+                                   onchange="updateRegistrationGrade(this, ${registration.id})" />
+                        </td>
+                        <td th:text="${#temporals.format(registration.registrationDate, 'yyyy-MM-dd HH:mm')}"></td>
+                        <td>
+                            <button type="button"
+                                    class="btn btn-outline-secondary btn-sm"
+                                    th:classappend="${registration.status != 1} ? 'disabled' : ''"
+                                    th:onclick="'updateRegistration(' + ${registration.id} + ')'"
+                                    th:disabled="${registration.status != 1}">Update</button>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+
+            <!-- Pagination -->
+            <nav aria-label="Page navigation example" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    <!-- Previous Button -->
+                    <li class="page-item" th:classappend="${currentPageNumber == 0} ? 'disabled' : ''">
+                        <a class="page-link"
+                           tabindex="-1"
+                           th:href="@{/students/{studentId}(studentId=${student.id}, page=${currentPageNumber - 1}, size=${size})}">Previous</a>
+                    </li>
+
+                    <!-- Page Numbers -->
+                    <li class="page-item"
+                        th:classappend="${i == currentPageNumber} ? 'active' : ''" th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
+                        <a class="page-link"
+                           th:href="@{/students/{studentId}(studentId=${student.id}, page=${i}, size=${size})}" th:text="${i + 1}"></a>
+                    </li>
+
+                    <!-- Next Button -->
+                    <li class="page-item" th:classappend="${currentPageNumber + 1 == totalPages} ? 'disabled' : ''">
+                        <a class="page-link"
+                           th:href="@{/students/{studentId}(studentId=${student.id}, page=${currentPageNumber + 1}, size=${size})}">Next</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+
+    <div class="text-end">
+        <a class="btn btn-secondary" th:href="@{/students}">
+            <i class="fas fa-arrow-left me-2"></i>Back to List
+        </a>
+    </div>
+</div>
+
+<th:block layout:fragment="scripts">
+    <script th:inline="javascript">
+        function updateRegistrationStatus(selectElement, registrationId) {
+            console.log('Status changed to:', selectElement.value, 'for registration:', registrationId);
+        }
+
+        function updateRegistrationGrade(inputElement, registrationId) {
+            console.log('Grade changed to:', inputElement.value, 'for registration:', registrationId);
+        }
+
+        function updateRegistration(registrationId) {
+            var statusElement = document.getElementById('status-' + registrationId);
+            var gradeElement = document.getElementById('grade-' + registrationId);
+            var status = statusElement.value;
+            var grade = gradeElement.value;
+
+            // Optional frontend check (kept for immediate feedback, but backend enforces it too anyway so...)
+            var originalStatus = statusElement.getAttribute('value');
+            if (originalStatus == '1' && status == '2' && (grade === '' || grade === null)) {
+                alert('Cannot set status to Finished without entering a grade.');
+                statusElement.value = originalStatus; // Revert to original status
+                return;
+            }
+
+            // Send update to backend :D
+            fetch('/students/updateRegistration/' + registrationId, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    status: parseInt(status),
+                    grade: grade === '' ? null : parseFloat(grade)
+                })
+            }).then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok!');
+                }
+                return response.json();
+            }).then(data => {
+                if (data.success) {
+                    alert('Registration updated successfully.');
+                    // Optionally refresh the page or disable fields here if needed
+                } else {
+                    alert('Error updating registration: ' + data.message);
+                    // Revert status to original if update fails
+                    statusElement.value = originalStatus;
+                }
+            }).catch(error => {
+                alert('There was an error updating the registration: ' + error.message);
+                statusElement.value = originalStatus; // Revert on network error
+            });
+        }
+    </script>
+</th:block>
+
+</body>
+</html>

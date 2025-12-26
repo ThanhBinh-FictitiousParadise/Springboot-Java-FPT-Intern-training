@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/main}">
+<body>
+<div layout:fragment="content" class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-primary text-white">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-user-plus me-2"></i>
+                        <h4 class="mb-0">New Registration</h4>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div th:if="${errorMessage != null}" class="alert alert-danger d-flex align-items-center" role="alert">
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                        <p class="mb-0" th:text="${errorMessage}"></p>
+                    </div>
+
+                    <form th:action="@{/registration/new}" method="POST" class="needs-validation" novalidate>
+                        <!-- Student Selection -->
+                        <div class="mb-4">
+                            <label for="studentId" class="form-label">
+                                Student <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0">
+                                    <div class="avatar-circle" th:text="${student != null ? #strings.substring(student.name,0,1) : '?' }"></div>
+                                </span>
+                                <select id="studentId" name="studentId" class="form-select border-start-0" required>
+                                    <option value="" th:unless="${student != null}">Select a student</option>
+                                    <option th:each="s : ${allStudents}"
+                                            th:value="${s.id}"
+                                            th:text="${s.name}"
+                                            th:selected="${student != null and student.id == s.id}">
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Subject Selection -->
+                        <div class="mb-4">
+                            <label for="subjectId" class="form-label">
+                                Subject <span class="text-danger">*</span>
+                            </label>
+                            <select id="subjectId" name="subjectId" class="form-select" required>
+                                <option value="" th:unless="${subject != null}">Select a subject</option>
+                                <option th:each="s : ${allSubjects}"
+                                        th:value="${s.id}"
+                                        th:text="${s.name}"
+                                        th:selected="${subject != null and subject.id == s.id}">
+                                </option>
+                            </select>
+                        </div>
+
+                        <!-- Semester Selection -->
+                        <div class="mb-4">
+                            <label for="semester" class="form-label">
+                                Semester <span class="text-danger">*</span>
+                            </label>
+                            <select id="semester" name="semester" class="form-select" required>
+                                <option value="">Select semester</option>
+                                <option value="Fall">Fall</option>
+                                <option value="Spring">Spring</option>
+                                <option value="Summer">Summer</option>
+                                <option value="Winter">Winter</option>
+                            </select>
+                        </div>
+
+                        <!-- Academic Year -->
+                        <div class="mb-4">
+                            <label for="academicYear" class="form-label">
+                                Academic Year <span class="text-danger">*</span>
+                            </label>
+                            <input type="number" id="academicYear" name="academicYear"
+                                   class="form-control"
+                                   placeholder="e.g., 2025" required>
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="d-flex justify-content-end gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Register
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<th:block layout:fragment="scripts">
+    <script th:inline="javascript">
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set current year
+            document.getElementById('academicYear').value = /*[[${#dates.year(#dates.createNow())}]]*/ 'Default Year';
+
+            // Form validation
+            const form = document.querySelector('form');
+            form.addEventListener('submit', function(event) {
+                if (!this.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                this.classList.add('was-validated');
+            });
+
+            // Enhanced select styling
+            const selects = document.querySelectorAll('select');
+            selects.forEach(select => {
+                select.addEventListener('change', function() {
+                    if (this.value) {
+                        this.classList.add('is-valid');
+                    } else {
+                        this.classList.remove('is-valid');
+                    }
+                });
+            });
+        });
+    </script>
+</th:block>
+</body>
+</html>

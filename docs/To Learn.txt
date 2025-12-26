@@ -1,0 +1,35 @@
+Java Core:
+	Basic OOP: class, object, inheritance, …)
+	Collection
+	Threads
+	Exception Handling
+	JDBC
+Java Web Application
+	JSP/ Servlet
+	Application Server
+	Spring boot Application
+	Spring boot application
+	Spring data JPA/ Hibernate
+	RESTful service
+	Postgres SQL
+	Spring
+		Autowired vs constructor injection (ưu nhược điểm mỗi loại)
+		Spring Bean scope, when spring bean is init?
+		What is lazy init?
+	Hibernate
+		Session, SessionFactory, Transaction?
+		First Level Cache vs Second Level Cache
+		Lazyloading
+		Transient
+
+Làm 1 ứng dụng quản lý học sinh trên nền java web. Các công nghệ cần có như ở trên của phần Spring boot Application:
+Hệ thống quản lý học sinh và các môn học.
+Một môn học có nhiều học sinh đăng ký học. Một học sinh có thể đăng ký nhiều môn học.
+Chức năng;
+	Quản lý học sinh (liệt kê, thêm mới, sửa thông tin, xóa)
+	Quản lý môn học (liệt kê, thêm mới, sửa thông tin, xóa)
+	Đăng ký học sinh học môn học mới
+	Xóa môn học đăng ký của học sinh
+	Xem list môn học đăng ký của học sinh
+	Xem danh sách học sinh đăng ký 1 môn học
+	Thống kê số môn học có nhiều học sinh đăng ký nhất và số học sinh đăng ký môn học đấy
